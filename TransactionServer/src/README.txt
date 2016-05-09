@@ -21,3 +21,6 @@ run(){
 		write
 		close
 	}
+	
+	
+write a small set of transactions, with a few set of outcomes. with assert true for every possible outcome.
