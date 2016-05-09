@@ -1,2 +1,23 @@
 Jon-Pierre Hanna hannaj2
 Peter Chorba chorbap
+
+
+two phase comit
+run(){
+	while(true){
+		for(..){
+			-
+			-	work on cache
+			-
+		}try{ (first phase)
+			for(i=a;i<=2;i++){
+				open if needed
+			}
+		}catch{ clean up then continue}
+		try{
+			for
+				verify(second phase) every acount that has been read.
+		}catch{clean up then continue}
+		write
+		close
+	}
