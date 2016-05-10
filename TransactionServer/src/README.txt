@@ -1,8 +1,8 @@
 Jon-Pierre Hanna hannaj2
-Peter Chorba chorbap
+Paul Chorba chorbp
 
 
-two phase comit
+two phase commit
 run(){
 	while(true){
 		for(..){
