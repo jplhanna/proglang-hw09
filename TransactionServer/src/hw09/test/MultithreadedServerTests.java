@@ -77,4 +77,28 @@ public class MultithreadedServerTests extends TestCase {
 		assertEquals("Account H might be wrong",accounts[7].getValue(),6);
 	}
      
+	@Test
+	public void referenceTest() throws IOException{
+		//initialize accounts
+		accounts=new Account[numLetters];
+		accounts[A]=new Account(37);//a
+		accounts[1]=new Account(8);//b
+		accounts[2]=new Account(0);//c
+		accounts[3]=new Account(40);//d
+		accounts[4]=new Account(8);//e
+		accounts[5]=new Account(0);//f
+		accounts[6]=new Account(125);//g
+		accounts[7]=new Account(0);//h
+		accounts[8]=new Account(26);//i
+		accounts[9]=new Account(360);//j
+		accounts[21]=new Account(450);//v
+		accounts[22]=new Account(10);//v
+		
+		MultithreadedServer.runServer("src/hw09/data/referenceData", accounts);
+		
+		assertEquals("Reference of A does not work",accounts[A],accounts[2]);
+		assertEquals("Double reference of G does not work",accounts[5],accounts[8]);
+		assertEquals("Reference subtraction might not work",47,accounts[7]);
+		assertEquals("Reference subtraction might not work",58,accounts[7]);
+	}
 }
