@@ -11,13 +11,21 @@ class CachedAccount{
 	private boolean read = false;
 	private boolean written = false;
 	private int initial;
-	private int open = 0;
 	private Account account;
 	
 	public CachedAccount(Account a) {
 		account = a;
 		initial = a.getValue();
 	}
+	
+	public void updateread() {
+		read = true;
+	}
+	
+	public void updatewrite() {
+		written = true;
+	}
+	
 	
 	public int getinitial() {
 		return initial;
@@ -90,19 +98,24 @@ class Task implements Runnable {
     // You probably want to change it to return a reference to an
     // account *cache* instead.
     //
-    private Account parseAccount(String name) {
+    private CachedAccount parseAccount(String name) {
         int accountNum = (int) (name.charAt(0)) - (int) 'A';
         if (accountNum < A || accountNum > Z)
             throw new InvalidTransactionError();
+        
         Account a = accounts[accountNum];
+        CachedAccount b = cachedAccounts[accountNum];
+        
         for (int i = 1; i < name.length(); i++) {
             if (name.charAt(i) != '*')
                 throw new InvalidTransactionError();
-            accountNum = (accounts[accountNum].peek() % numLetters);
             
+            accountNum = (accounts[accountNum].peek() % numLetters);
             a = accounts[accountNum];
+            b = cachedAccounts[accountNum];
         }
-        return a;
+        
+        return b;
     }
 
     private int parseAccountOrNum(String name) {
@@ -123,7 +136,7 @@ class Task implements Runnable {
             String[] words = commands[i].trim().split("\\s");
             if (words.length < 3)
                 throw new InvalidTransactionError();
-            Account lhs = parseAccount(words[0]);
+            CachedAccount lhs = parseAccount(words[0]);
             if (!words[1].equals("="))
                 throw new InvalidTransactionError();
             int rhs = parseAccountOrNum(words[2]);
