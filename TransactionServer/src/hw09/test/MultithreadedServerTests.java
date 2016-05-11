@@ -53,5 +53,28 @@ public class MultithreadedServerTests extends TestCase {
 
 	 }
 	 	  	 
-	
+	@Test
+	public void testBasics() throws IOException{
+		//initialize accounts
+		accounts=new Account[11];
+		accounts[A]=new Account(0);//a
+		accounts[1]=new Account(1);//b
+		accounts[2]=new Account(2);//c
+		accounts[3]=new Account(5);//d
+		accounts[4]=new Account(0);//e
+		accounts[5]=new Account(3);//f
+		accounts[6]=new Account(1);//g
+		accounts[7]=new Account(0);//h
+		accounts[8]=new Account(2);//i
+		accounts[9]=new Account(6);//j
+		accounts[10]=new Account(3);//k
+		
+		MultithreadedServer.runServer("src/hw09/data/basicData", accounts);
+		assertEquals("Account A differs",3,accounts[0].getValue());
+		assertEquals("Account D differs",8,accounts[3].getValue());
+		assertEquals("Account E differs",5,accounts[4].getValue());
+		assertEquals("Account H might be wrong",accounts[7].getValue(),8);
+		assertEquals("Account H might be wrong",accounts[7].getValue(),6);
+	}
+     
 }
