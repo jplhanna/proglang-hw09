@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 class CachedAccount{
@@ -90,6 +91,10 @@ class Task implements Runnable {
 
     private CachedAccount[] cachedAccounts;
     private String transaction;
+    
+    private void closeEverything(){
+    	
+    }
 
     // TO DO: The sequential version of Task peeks at accounts
     // whenever it needs to get a value, and opens, updates, and closes
@@ -185,8 +190,8 @@ class Task implements Runnable {
 	        	for (int i = A; i <= Z; i++){
 	        		//if both written and read are marked
 	        		if (cachedAccounts[i].getRead() && cachedAccounts[i].getWritten()) {
-	        			cachedAccounts[i].open(true);
 	        			cachedAccounts[i].open(false);
+	        			cachedAccounts[i].open(true);
 					}
 					//if only written is marked
 					else if (cachedAccounts[i].getWritten()) {
@@ -199,7 +204,7 @@ class Task implements Runnable {
 	        	}
 	        } catch (TransactionAbortException exception) {
 	        	//close all accounts and reset
-	        	
+	        	closeEverything();
 	        	continue;
 	        }
 	        
@@ -213,7 +218,7 @@ class Task implements Runnable {
 	        	}
 	        } catch (TransactionAbortException exception) {
 	        	//close all accounts and reset again
-	        	
+	        	closeEverything();
 	        	continue;
 	        }
 	        
@@ -225,7 +230,7 @@ class Task implements Runnable {
 	        }
 	        
 	        //close all accounts and reset and break since we've succeeded finally
-	        
+	        closeEverything();
 	        break;
         }
 	    System.out.println("commit: " + transaction);
@@ -254,6 +259,13 @@ public class MultithreadedServer {
         	pool.execute(new Task(accounts,line));
         }
         pool.shutdown();
+        
+        //waits for everything to terminate (so the 
+        try {
+        	pool.awaitTermination(120,TimeUnit.SECONDS);
+        } catch (InterruptedException exception) {
+        	System.err.println("Pool failed to terminate in alotted time");
+        }
         
         input.close();
 
