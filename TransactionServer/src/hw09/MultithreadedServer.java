@@ -11,6 +11,7 @@ class CachedAccount{
 	private boolean read = false;
 	private boolean written = false;
 	private int initial;
+	private int temp;
 	private Account account;
 	
 	public CachedAccount(Account a) {
@@ -18,16 +19,19 @@ class CachedAccount{
 		initial = a.getValue();
 	}
 	
-	public void updateread() {
+	public void updateRead() {
 		read = true;
 	}
 	
-	public void updatewrite() {
+	public void updateWrite() {
 		written = true;
 	}
+
+	public void updateTemp(int a){
+		temp=a;
+	}
 	
-	
-	public int getinitial() {
+	public int getInitial() {
 		return initial;
 	}
 	
@@ -59,8 +63,20 @@ class CachedAccount{
 		account.printMod();
 	}
 	
-	public void getValue() {
-		account.getValue();
+	public boolean getRead(){
+		return read;
+	}
+	
+	public boolean getWritten(){
+		return written;
+	}
+	
+	public int getTemp(){
+		return temp;
+	}
+	
+	public int getValue() {
+		return account.getValue();
 	}
 }
 // TO DO: Task is currently an ordinary class.
@@ -72,7 +88,6 @@ class Task implements Runnable {
     private static final int Z = constants.Z;
     private static final int numLetters = constants.numLetters;
 
-    private Account[] accounts;
     private CachedAccount[] cachedAccounts;
     private String transaction;
 
@@ -86,10 +101,9 @@ class Task implements Runnable {
     // (3) perform all updates, and (4) close all opened accounts.
 
     public Task(Account[] allAccounts, String trans) {
-        accounts = allAccounts;
-        cachedAccounts = new CachedAccount[accounts.length];
-        for (int i = 0; i < accounts.length; i++) {
-        	cachedAccounts[i] = new CachedAccount(accounts[i]);
+        cachedAccounts = new CachedAccount[allAccounts.length];
+        for (int i = 0; i < allAccounts.length; i++) {
+        	cachedAccounts[i] = new CachedAccount(allAccounts[i]);
         }
         transaction = trans;
     }
@@ -103,15 +117,13 @@ class Task implements Runnable {
         if (accountNum < A || accountNum > Z)
             throw new InvalidTransactionError();
         
-        Account a = accounts[accountNum];
         CachedAccount b = cachedAccounts[accountNum];
         
         for (int i = 1; i < name.length(); i++) {
             if (name.charAt(i) != '*')
                 throw new InvalidTransactionError();
             
-            accountNum = (accounts[accountNum].peek() % numLetters);
-            a = accounts[accountNum];
+            accountNum = (cachedAccounts[accountNum].peek() % numLetters);
             b = cachedAccounts[accountNum];
         }
         
@@ -123,7 +135,10 @@ class Task implements Runnable {
         if (name.charAt(0) >= '0' && name.charAt(0) <= '9') {
             rtn = new Integer(name).intValue();
         } else {
-            rtn = parseAccount(name).peek();
+        	//updates to say that the value is only being read, not written, peeks for returning
+        	CachedAccount tempaccount=parseAccount(name);
+        	tempaccount.updateRead();
+            rtn = tempaccount.peek();
         }
         return rtn;
     }
@@ -131,32 +146,89 @@ class Task implements Runnable {
     public void run() {
         // tokenize transaction
         String[] commands = transaction.split(";");
-
-        for (int i = 0; i < commands.length; i++) {
-            String[] words = commands[i].trim().split("\\s");
-            if (words.length < 3)
-                throw new InvalidTransactionError();
-            CachedAccount lhs = parseAccount(words[0]);
-            if (!words[1].equals("="))
-                throw new InvalidTransactionError();
-            int rhs = parseAccountOrNum(words[2]);
-            for (int j = 3; j < words.length; j+=2) {
-                if (words[j].equals("+"))
-                    rhs += parseAccountOrNum(words[j+1]);
-                else if (words[j].equals("-"))
-                    rhs -= parseAccountOrNum(words[j+1]);
-                else
-                    throw new InvalidTransactionError();
-            }
-            try {
-                lhs.open(true);
-            } catch (TransactionAbortException e) {
-                // won't happen in sequential version
-            }
-            lhs.update(rhs);
-            lhs.close();
+        
+        //keeps going until run has succeeded has succeeded
+        while (true){
+	        for (int i = 0; i < commands.length; i++) {
+	            String[] words = commands[i].trim().split("\\s");
+	            if (words.length < 3)
+	                throw new InvalidTransactionError();
+	            CachedAccount lhs = parseAccount(words[0]);
+	            //marks that the account will be written to later
+	            lhs.updateWrite();
+	            
+	            if (!words[1].equals("="))
+	                throw new InvalidTransactionError();
+	            
+	            int rhs = parseAccountOrNum(words[2]);
+	            
+	            for (int j = 3; j < words.length; j+=2) {
+	                if (words[j].equals("+"))
+	                    rhs += parseAccountOrNum(words[j+1]);
+	                else if (words[j].equals("-"))
+	                    rhs -= parseAccountOrNum(words[j+1]);
+	                else
+	                    throw new InvalidTransactionError();
+	            }
+	            /*try {
+	                lhs.open(true);
+	            } catch (TransactionAbortException e) {
+	                // won't happen in sequential version
+	            }*/
+	            lhs.updateTemp(rhs);
+	            
+	            //lhs.close();
+	        }
+	        
+	        //now we attempt to open all the accounts...
+	        try {
+	        	for (int i = A; i <= Z; i++){
+	        		//if both written and read are marked
+	        		if (cachedAccounts[i].getRead() && cachedAccounts[i].getWritten()) {
+	        			cachedAccounts[i].open(true);
+	        			cachedAccounts[i].open(false);
+					}
+					//if only written is marked
+					else if (cachedAccounts[i].getWritten()) {
+						cachedAccounts[i].open(true);
+					}
+					//if only read is marked
+					else if (cachedAccounts[i].getRead()) {
+						cachedAccounts[i].open(false);
+					}
+	        	}
+	        } catch (TransactionAbortException exception) {
+	        	//close all accounts and reset
+	        	
+	        	continue;
+	        }
+	        
+	        //if we've made it this far, verify that the read values are accurate
+	        try {
+	        	
+	        	for (int i = A; i <= Z; i++){
+	        		if (cachedAccounts[i].getRead()){
+	        			cachedAccounts[i].verify(cachedAccounts[i].getInitial());
+	        		}
+	        	}
+	        } catch (TransactionAbortException exception) {
+	        	//close all accounts and reset again
+	        	
+	        	continue;
+	        }
+	        
+	        //if we have passed everything else, we can finally actually write the values
+	        for (int i = A; i <= Z; i++){
+	        	if (cachedAccounts[i].getWritten()){
+	        		cachedAccounts[i].update(cachedAccounts[i].getTemp());
+	        	}
+	        }
+	        
+	        //close all accounts and reset and break since we've succeeded finally
+	        
+	        break;
         }
-        System.out.println("commit: " + transaction);
+	    System.out.println("commit: " + transaction);
     }
 }
 
