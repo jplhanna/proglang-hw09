@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 // You will need to modify it to make it a task,
 // so it can be given to an Executor thread pool.
 //
-class Task {
+class Task implements Runnable {
     private static final int A = constants.A;
     private static final int Z = constants.Z;
     private static final int numLetters = constants.numLetters;
