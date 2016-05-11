@@ -6,8 +6,57 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
+class CachedAccount{
+	private boolean read = false;
+	private boolean written = false;
+	private int initial;
+	private int open = 0;
+	private Account account;
+	
+	public CachedAccount(Account a) {
+		account = a;
+		initial = a.getValue();
+	}
+	
+	public int getinitial() {
+		return initial;
+	}
+	
+	public int peek() {
+		return account.peek();
+	}
+	
+	public void verify(int expected) throws TransactionAbortException {
+		account.verify(expected);
+	}
+	
+	public void update(int value) {
+		account.update(value);
+	}
+	
+	public void open(boolean forWriting) throws TransactionAbortException {
+		account.open(forWriting);
+	}
+	
+	public void close() {
+		account.close();
+	}
+	
+	public void print() {
+		account.print();
+	}
+	
+	public void printMod() {
+		account.printMod();
+	}
+	
+	public void getValue() {
+		account.getValue();
+	}
+}
 // TO DO: Task is currently an ordinary class.
-// You will need to modify it to make it a task,
+// You will need to modify it to make it a task,	DONE
 // so it can be given to an Executor thread pool.
 //
 class Task implements Runnable {
@@ -16,6 +65,7 @@ class Task implements Runnable {
     private static final int numLetters = constants.numLetters;
 
     private Account[] accounts;
+    private CachedAccount[] cachedAccounts;
     private String transaction;
 
     // TO DO: The sequential version of Task peeks at accounts
@@ -29,6 +79,10 @@ class Task implements Runnable {
 
     public Task(Account[] allAccounts, String trans) {
         accounts = allAccounts;
+        cachedAccounts = new CachedAccount[accounts.length];
+        for (int i = 0; i < accounts.length; i++) {
+        	cachedAccounts[i] = new CachedAccount(accounts[i]);
+        }
         transaction = trans;
     }
     
@@ -45,6 +99,7 @@ class Task implements Runnable {
             if (name.charAt(i) != '*')
                 throw new InvalidTransactionError();
             accountNum = (accounts[accountNum].peek() % numLetters);
+            
             a = accounts[accountNum];
         }
         return a;
