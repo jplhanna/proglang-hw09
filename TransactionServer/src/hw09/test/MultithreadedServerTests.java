@@ -57,7 +57,7 @@ public class MultithreadedServerTests extends TestCase {
 	public void testBasics() throws IOException{
 		//initialize accounts
 		accounts=new Account[numLetters];
-		for(int i=A;i<Z;i++){
+		for(int i=A;i<=Z;i++){
 			accounts[i]=new Account(0);
 		}
 		accounts[1]=new Account(1);//b
@@ -81,7 +81,7 @@ public class MultithreadedServerTests extends TestCase {
 	public void referenceTest() throws IOException{
 		//initialize accounts
 		accounts=new Account[numLetters];
-		for(int i=A;i<Z;i++){
+		for(int i=A;i<=Z;i++){
 			accounts[i]=new Account(0);
 		}
 		accounts[A]=new Account(37);//a
@@ -108,7 +108,7 @@ public class MultithreadedServerTests extends TestCase {
 		
 		//initialize accounts
 		accounts=new Account[numLetters];
-		for(int i=A;i<Z;i++){
+		for(int i=A;i<=Z;i++){
 			accounts[i]=new Account(0);
 		}
 		accounts[1]=new Account(3);//b
