@@ -56,15 +56,15 @@ public class MultithreadedServerTests extends TestCase {
 	@Test
 	public void testBasics() throws IOException{
 		//initialize accounts
-		accounts=new Account[11];
-		accounts[A]=new Account(0);//a
+		accounts=new Account[numLetters];
+		for(int i=A;i<Z;i++){
+			accounts[i]=new Account(0);
+		}
 		accounts[1]=new Account(1);//b
 		accounts[2]=new Account(2);//c
 		accounts[3]=new Account(5);//d
-		accounts[4]=new Account(0);//e
 		accounts[5]=new Account(3);//f
 		accounts[6]=new Account(1);//g
-		accounts[7]=new Account(0);//h
 		accounts[8]=new Account(2);//i
 		accounts[9]=new Account(6);//j
 		accounts[10]=new Account(3);//k
@@ -81,14 +81,14 @@ public class MultithreadedServerTests extends TestCase {
 	public void referenceTest() throws IOException{
 		//initialize accounts
 		accounts=new Account[numLetters];
+		for(int i=A;i<Z;i++){
+			accounts[i]=new Account(0);
+		}
 		accounts[A]=new Account(37);//a
 		accounts[1]=new Account(8);//b
-		accounts[2]=new Account(0);//c
 		accounts[3]=new Account(40);//d
 		accounts[4]=new Account(8);//e
-		accounts[5]=new Account(0);//f
 		accounts[6]=new Account(125);//g
-		accounts[7]=new Account(0);//h
 		accounts[8]=new Account(26);//i
 		accounts[9]=new Account(360);//j
 		accounts[21]=new Account(450);//v
@@ -107,25 +107,24 @@ public class MultithreadedServerTests extends TestCase {
 		accounts=new Account[numLetters];
 		
 		//initialize accounts
-				accounts=new Account[numLetters];
-				accounts[A]=new Account(0);//a
-				accounts[1]=new Account(3);//b
-				accounts[2]=new Account(5);//c
-				accounts[3]=new Account(8);//d
-				accounts[4]=new Account(0);//e
-				accounts[5]=new Account(20);//f
-				accounts[6]=new Account(10);//g
-				accounts[7]=new Account(5);//h
-				accounts[8]=new Account(0);//i
-				accounts[9]=new Account(40);//j
-				accounts[10]=new Account(2);//k
-				accounts[11]=new Account(8);//l
-				accounts[12]=new Account(0);//m
-				accounts[13]=new Account(300);//n
-				accounts[14]=new Account(200);//o
-				accounts[15]=new Account(100);//p
-				accounts[18]=new Account(50);//s
-				accounts[22]=new Account(125);//w
+		accounts=new Account[numLetters];
+		for(int i=A;i<Z;i++){
+			accounts[i]=new Account(0);
+		}
+		accounts[1]=new Account(3);//b
+		accounts[2]=new Account(5);//c
+		accounts[3]=new Account(8);//d
+		accounts[5]=new Account(20);//f
+		accounts[6]=new Account(10);//g
+		accounts[7]=new Account(5);//h
+		accounts[9]=new Account(40);//j
+		accounts[10]=new Account(2);//k
+		accounts[11]=new Account(8);//l
+		accounts[13]=new Account(300);//n
+		accounts[14]=new Account(200);//o
+		accounts[15]=new Account(100);//p
+		accounts[18]=new Account(50);//s
+		accounts[22]=new Account(125);//w
 		
 		MultithreadedServer.runServer("src/hw09/data/multiTransactions",accounts);
 		
