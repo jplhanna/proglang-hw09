@@ -1,6 +1,6 @@
 A = B + C
 D = B + C
-E = C - B
+E = E - B
 E = E + G
 E = E + F
 J = I + K

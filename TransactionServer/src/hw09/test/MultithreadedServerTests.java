@@ -63,6 +63,7 @@ public class MultithreadedServerTests extends TestCase {
 		accounts[1]=new Account(1);//b
 		accounts[2]=new Account(2);//c
 		accounts[3]=new Account(5);//d
+		accounts[4]=new Account(2);//e
 		accounts[5]=new Account(3);//f
 		accounts[6]=new Account(1);//g
 		accounts[8]=new Account(2);//i
