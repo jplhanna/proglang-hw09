@@ -92,8 +92,13 @@ class Task implements Runnable {
     private CachedAccount[] cachedAccounts;
     private String transaction;
     
+    //closes all of the open files
     private void closeEverything(){
-    	
+    	for (int i = A; i <= Z; i++){
+    		if (cachedAccounts[i].getRead() || cachedAccounts[i].getWritten()){
+    			cachedAccounts[i].close();
+    		}
+    	}
     }
 
     // TO DO: The sequential version of Task peeks at accounts
