@@ -96,7 +96,12 @@ class Task implements Runnable {
     private void closeEverything(){
     	for (int i = A; i <= Z; i++){
     		if (cachedAccounts[i].getRead() || cachedAccounts[i].getWritten()){
-    			cachedAccounts[i].close();
+    			try {
+					cachedAccounts[i].close();
+				}
+				catch (TransactionUsageError exception) {
+					//do nothing, but catch the exception...
+				}
     		}
     	}
     }
@@ -230,7 +235,9 @@ class Task implements Runnable {
 	        //if we have passed everything else, we can finally actually write the values
 	        for (int i = A; i <= Z; i++){
 	        	if (cachedAccounts[i].getWritten()){
+	        		//System.out.println("caching: " + cachedAccounts[i].getValue());
 	        		cachedAccounts[i].update(cachedAccounts[i].getTemp());
+	        		//System.out.println("cached: " + cachedAccounts[i].getValue());
 	        	}
 	        }
 	        
