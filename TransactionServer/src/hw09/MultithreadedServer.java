@@ -7,7 +7,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-
+//A class which boxes an account object, holding additional information. Acts an initial layer of to call functions
+//on Accounts which will be accessed often.
 class CachedAccount{
 	private boolean read = false;
 	private boolean written = false;
@@ -92,7 +93,9 @@ class Task implements Runnable {
     private CachedAccount[] cachedAccounts;
     private String transaction;
     
-    //closes all of the open files
+    //Requires:cachedAccounts!=null;
+    //modifies:cachedAcounts
+    //effects:Runs through all accounts in cachedAcounts and closes them.
     private void closeEverything(){
     	for (int i = A; i <= Z; i++){
     		if (cachedAccounts[i].getRead() || cachedAccounts[i].getWritten()){
@@ -115,6 +118,9 @@ class Task implements Runnable {
     // writing, or both, (2) verify all previously peeked-at values,
     // (3) perform all updates, and (4) close all opened accounts.
 
+    //requires: allAccounts!=null&allAccounts.length==26,trans!=null and start with the form "char = " 
+    //modifies:cashedAccounts and transaction
+    //sets: boxes in the array of Accounts into an Array of CachedAccounts and sets cachedAccounts to that. Sets transactions to trans.
     public Task(Account[] allAccounts, String trans) {
         cachedAccounts = new CachedAccount[allAccounts.length];
         for (int i = 0; i < allAccounts.length; i++) {
@@ -158,6 +164,10 @@ class Task implements Runnable {
         return rtn;
     }
 
+    //requires: cachedAccounts!=null&transaction!=null
+    //modifies: cachedAccounts
+    //effects: Reads through the list of transactions from data files and constructs a set of instructions to complete
+    //Which it then feeds into the Threaded Pool to complete, if possible. These changes are input into cachedAccounts.
     public void run() {
         // tokenize transaction
         String[] commands = transaction.split(";");
