@@ -1,7 +1,7 @@
-A=B+C
-D=B+C
-E=C-B
-E=E+G
-E=E+F
-J=I+K
-K=K-J
+A = B + C
+D = B + C
+E = C - B
+E = E + G
+E = E + F
+J = I + K
+K = K - J
