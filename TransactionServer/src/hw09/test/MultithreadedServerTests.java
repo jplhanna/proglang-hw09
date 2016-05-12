@@ -43,7 +43,7 @@ public class MultithreadedServerTests extends TestCase {
 			accounts[i] = new Account(Z-i);
 		}			 
 		
-		MultithreadedServer.runServer("src/hw09/data/increment", accounts);
+		MultithreadedServer.runServer("hw09/data/increment", accounts);
 	
 		// assert correct account values
 		for (int i = A; i <= Z; i++) {
@@ -70,7 +70,7 @@ public class MultithreadedServerTests extends TestCase {
 		accounts[8]=new Account(2);//I
 		accounts[9]=new Account(6);//J
 		accounts[10]=new Account(3);//K
-		MultithreadedServer.runServer("src/hw09/data/basicData", accounts);
+		MultithreadedServer.runServer("hw09/data/basicData", accounts);
 		for (int i = A; i <= Z; i++){
 			System.out.println(i + " " + accounts[i].getValue());
 		}
@@ -99,7 +99,7 @@ public class MultithreadedServerTests extends TestCase {
 		accounts[21]=new Account(450);//v
 		accounts[22]=new Account(10);//w
 		
-		MultithreadedServer.runServer("src/hw09/data/referenceData", accounts);
+		MultithreadedServer.runServer("hw09/data/referenceData", accounts);
 		
 		assertEquals("Reference of A does not work",accounts[A].getValue(),accounts[2].getValue());
 		assertEquals("Double reference of G does not work",accounts[5].getValue(),accounts[8].getValue());
@@ -132,7 +132,7 @@ public class MultithreadedServerTests extends TestCase {
 		accounts[18]=new Account(50);//s
 		accounts[22]=new Account(125);//w
 		
-		MultithreadedServer.runServer("src/hw09/data/multiTransactions",accounts);
+		MultithreadedServer.runServer("hw09/data/multiTransactions",accounts);
 		
 		assertEquals("Tri addition differs",16,accounts[A].getValue());
 		assertEquals("Tri subtraction differs",5,accounts[4].getValue());
