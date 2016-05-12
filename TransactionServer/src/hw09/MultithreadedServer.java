@@ -10,29 +10,39 @@ import java.util.concurrent.TimeUnit;
 //A class which boxes an account object, holding additional information. Acts an initial layer of to call functions
 //on Accounts which will be accessed often.
 class CachedAccount{
-	private boolean read = false;
-	private boolean written = false;
-	private int initial;
-	private int temp;
+	private boolean read = false; //shared mutable
+	private boolean written = false; //shared mutable
+	private int initial; //shared imutable
+	private int temp; //shared mutable
 	private Account account;
 	
+	//requires:a!=null and a.getValue()!=null
+	//modifies:account and initial
+	//effects:sets account to a and initial to the value of account a
 	public CachedAccount(Account a) {
 		account = a;
 		initial = a.getValue();
 	}
-	
+	//requires:nothing
+	//modifies:read
+	//effects:sets read to true
 	public void updateRead() {
 		read = true;
 	}
-	
+	//requires:nothing
+	//modifies:written
+	//effects:sets written to true
 	public void updateWrite() {
 		written = true;
 	}
 
+	//requires:a!=null
+	//modifies:temp
+	//effects:sets temp to the new value which account might set to, a. 
 	public void updateTemp(int a){
 		temp=a;
 	}
-	
+	//output:returns the initial value of the stored Account
 	public int getInitial() {
 		return initial;
 	}
@@ -64,15 +74,15 @@ class CachedAccount{
 	public void printMod() {
 		account.printMod();
 	}
-	
+	//output:returns whether this account will be read.
 	public boolean getRead(){
 		return read;
 	}
-	
+	//output:returns whether this account will be written to
 	public boolean getWritten(){
 		return written;
 	}
-	
+	//outpout:returns what the temporary value that account might be.
 	public int getTemp(){
 		return temp;
 	}
@@ -130,7 +140,7 @@ class Task implements Runnable {
     }
     
     // TO DO: parseAccount currently returns a reference to an account.
-    // You probably want to change it to return a reference to an
+    // You probably want to change it to return a reference to an	DONE
     // account *cache* instead.
     //
     private CachedAccount parseAccount(String name) {
