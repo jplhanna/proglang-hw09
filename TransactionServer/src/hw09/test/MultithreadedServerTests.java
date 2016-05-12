@@ -56,31 +56,35 @@ public class MultithreadedServerTests extends TestCase {
 	@Test
 	public void testBasics() throws IOException{
 		//initialize accounts
+		System.out.println("Test Basics Starting: ");
 		accounts=new Account[numLetters];
-		for(int i=A;i<=Z;i++){
+		for(int i = A; i <= Z; i++){
 			accounts[i]=new Account(0);
 		}
-		accounts[1]=new Account(1);//b
-		accounts[2]=new Account(2);//c
-		accounts[3]=new Account(5);//d
-		accounts[4]=new Account(2);//e
-		accounts[5]=new Account(3);//f
-		accounts[6]=new Account(1);//g
-		accounts[8]=new Account(2);//i
-		accounts[9]=new Account(6);//j
-		accounts[10]=new Account(3);//k
-		
+		accounts[1]=new Account(1);//B
+		accounts[2]=new Account(2);//C
+		accounts[3]=new Account(5);//D
+		accounts[4]=new Account(2);//E
+		accounts[5]=new Account(3);//F
+		accounts[6]=new Account(1);//G
+		accounts[8]=new Account(2);//I
+		accounts[9]=new Account(6);//J
+		accounts[10]=new Account(3);//K
 		MultithreadedServer.runServer("src/hw09/data/basicData", accounts);
+		for (int i = A; i <= Z; i++){
+			System.out.println(i + " " + accounts[i].getValue());
+		}
 		assertEquals("Account A differs",3,accounts[0].getValue());
-		assertEquals("Account D differs",8,accounts[3].getValue());
+		assertEquals("Account D differs",3,accounts[3].getValue());
 		assertEquals("Account E differs",5,accounts[4].getValue());
-		assertEquals("Account H might be wrong",accounts[7].getValue(),8);
-		assertEquals("Account H might be wrong",accounts[7].getValue(),6);
+		assertEquals("Account J might be wrong",accounts[9].getValue(),-1);
+		assertEquals("Account K might be wrong",accounts[10].getValue(),-3);
 	}
      
 	@Test
 	public void referenceTest() throws IOException{
 		//initialize accounts
+		System.out.println("Test reference Starting: ");
 		accounts=new Account[numLetters];
 		for(int i=A;i<=Z;i++){
 			accounts[i]=new Account(0);
@@ -105,6 +109,7 @@ public class MultithreadedServerTests extends TestCase {
 	
 	@Test
 	public void multiTransactionsTest() throws IOException{
+		System.out.println("Test multitransactions Starting: ");
 		accounts=new Account[numLetters];
 		
 		//initialize accounts

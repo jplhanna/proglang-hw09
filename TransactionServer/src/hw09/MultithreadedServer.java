@@ -35,16 +35,30 @@ class CachedAccount{
 	public void updateWrite() {
 		written = true;
 	}
-
 	//requires:a!=null
 	//modifies:temp
 	//effects:sets temp to the new value which account might set to, a. 
 	public void updateTemp(int a){
-		temp=a;
+		temp = a;
+	}
+	public void updateInitial(int a){
+		initial = a;
 	}
 	//output:returns the initial value of the stored Account
 	public int getInitial() {
 		return initial;
+	}
+	//output:returns whether this account will be read.
+	public boolean getRead(){
+		return read;
+	}
+	//output:returns whether this account will be written to
+	public boolean getWritten(){
+		return written;
+	}
+	//output:returns what the temporary value that account might be.
+	public int getTemp(){
+		return temp;
 	}
 	
 	public int peek() {
@@ -74,18 +88,6 @@ class CachedAccount{
 	public void printMod() {
 		account.printMod();
 	}
-	//output:returns whether this account will be read.
-	public boolean getRead(){
-		return read;
-	}
-	//output:returns whether this account will be written to
-	public boolean getWritten(){
-		return written;
-	}
-	//outpout:returns what the temporary value that account might be.
-	public int getTemp(){
-		return temp;
-	}
 	
 	public int getValue() {
 		return account.getValue();
@@ -101,7 +103,32 @@ class Task implements Runnable {
     private static final int numLetters = constants.numLetters;
 
     private CachedAccount[] cachedAccounts;
+	//private Account[] accounts;
     private String transaction;
+	private int threadnumber;
+
+    // TO DO: The sequential version of Task peeks at accounts
+    // whenever it needs to get a value, and opens, updates, and closes
+    // an account whenever it needs to set a value.  This won't work in
+    // the parallel version.  Instead, you'll need to cache values
+    // you've read and written, and then, after figuring out everything
+    // you want to do, (1) open all accounts you need, for reading,
+    // writing, or both, (2) verify all previously peeked-at values,
+    // (3) perform all updates, and (4) close all opened accounts.
+
+    //requires: allAccounts!=null&allAccounts.length==26,trans!=null and start with the form "char = " 
+    //modifies:cashedAccounts and transaction
+    //sets: boxes in the array of Accounts into an Array of CachedAccounts and sets cachedAccounts to that. Sets transactions to trans.
+    public Task(Account[] allAccounts, String trans, int thread) {
+		//copies the accounts and creates array of cached accounts too
+		//accounts = allAccounts;
+        cachedAccounts = new CachedAccount[allAccounts.length];
+        for (int i = 0; i < allAccounts.length; i++) {
+        	cachedAccounts[i] = new CachedAccount(allAccounts[i]);
+        }
+        transaction = trans;
+		threadnumber = thread; //used purely for possible delays
+    }
     
     //Requires:cachedAccounts!=null;
     //modifies:cachedAcounts
@@ -118,47 +145,29 @@ class Task implements Runnable {
     		}
     	}
     }
-
-    // TO DO: The sequential version of Task peeks at accounts
-    // whenever it needs to get a value, and opens, updates, and closes
-    // an account whenever it needs to set a value.  This won't work in
-    // the parallel version.  Instead, you'll need to cache values
-    // you've read and written, and then, after figuring out everything
-    // you want to do, (1) open all accounts you need, for reading,
-    // writing, or both, (2) verify all previously peeked-at values,
-    // (3) perform all updates, and (4) close all opened accounts.
-
-    //requires: allAccounts!=null&allAccounts.length==26,trans!=null and start with the form "char = " 
-    //modifies:cashedAccounts and transaction
-    //sets: boxes in the array of Accounts into an Array of CachedAccounts and sets cachedAccounts to that. Sets transactions to trans.
-    public Task(Account[] allAccounts, String trans) {
-        cachedAccounts = new CachedAccount[allAccounts.length];
-        for (int i = 0; i < allAccounts.length; i++) {
-        	cachedAccounts[i] = new CachedAccount(allAccounts[i]);
-        }
-        transaction = trans;
-    }
-    
+	
     // TO DO: parseAccount currently returns a reference to an account.
     // You probably want to change it to return a reference to an	DONE
     // account *cache* instead.
     //
-    private CachedAccount parseAccount(String name) {
+    private int parseAccount(String name) {
         int accountNum = (int) (name.charAt(0)) - (int) 'A';
         if (accountNum < A || accountNum > Z)
             throw new InvalidTransactionError();
         
         CachedAccount b = cachedAccounts[accountNum];
-        
+        //goes down the path of *s if there are any
         for (int i = 1; i < name.length(); i++) {
             if (name.charAt(i) != '*')
                 throw new InvalidTransactionError();
-            
-            accountNum = (cachedAccounts[accountNum].peek() % numLetters);
+            //accountNum = (accounts[accountNum].peek() % numLetters);
+			accountNum = (cachedAccounts[accountNum].peek() % numLetters);
             b = cachedAccounts[accountNum];
         }
-        
-        return b;
+		//update initial for easier access
+        b.updateInitial(cachedAccounts[accountNum].peek());
+        //return the accountNum instead so that we have fewer peeks
+        return accountNum;
     }
 
     private int parseAccountOrNum(String name) {
@@ -167,9 +176,9 @@ class Task implements Runnable {
             rtn = new Integer(name).intValue();
         } else {
         	//updates to say that the value is only being read, not written, peeks for returning
-        	CachedAccount tempaccount=parseAccount(name);
-        	tempaccount.updateRead();
-            rtn = tempaccount.peek();
+        	int tempaccountNum=parseAccount(name);
+        	cachedAccounts[tempaccountNum].updateRead();
+            rtn = cachedAccounts[tempaccountNum].getInitial();
         }
         return rtn;
     }
@@ -182,19 +191,22 @@ class Task implements Runnable {
         // tokenize transaction
         String[] commands = transaction.split(";");
         
-        //keeps going until run has succeeded has succeeded
+        //keeps going until run has succeeded
         while (true){
+			//for each command in the given list file
 	        for (int i = 0; i < commands.length; i++) {
+				
 	            String[] words = commands[i].trim().split("\\s");
 	            if (words.length < 3)
 	                throw new InvalidTransactionError();
-	            CachedAccount lhs = parseAccount(words[0]);
+	            CachedAccount lhs = cachedAccounts[parseAccount(words[0])];
 	            //marks that the account will be written to later
 	            lhs.updateWrite();
 	            
 	            if (!words[1].equals("="))
 	                throw new InvalidTransactionError();
 	            
+				//gets the appropriate value by calling our function
 	            int rhs = parseAccountOrNum(words[2]);
 	            
 	            for (int j = 3; j < words.length; j+=2) {
@@ -210,6 +222,7 @@ class Task implements Runnable {
 	            } catch (TransactionAbortException e) {
 	                // won't happen in sequential version
 	            }*/
+				//this is the value that lhs will later be updated to
 	            lhs.updateTemp(rhs);
 	            
 	            //lhs.close();
@@ -222,20 +235,30 @@ class Task implements Runnable {
 	        		if (cachedAccounts[i].getRead() && cachedAccounts[i].getWritten()) {
 	        			cachedAccounts[i].open(false);
 	        			cachedAccounts[i].open(true);
+						//accounts[i].open(false);
+	        			//accounts[i].open(true);
 					}
 					//if only written is marked
 					else if (cachedAccounts[i].getWritten()) {
 						cachedAccounts[i].open(true);
+						//accounts[i].open(true);
 					}
 					//if only read is marked
 					else if (cachedAccounts[i].getRead()) {
 						cachedAccounts[i].open(false);
+						//accounts[i].open(false);
 					}
 	        	}
 	        } catch (TransactionAbortException exception) {
 	        	//close all accounts and reset
 	        	closeEverything();
-	        	continue;
+				//if multiple threads are attempting to edit the same Account, we must delay one more than the other to stagger them
+				try {
+					Thread.sleep(threadnumber*5);
+				} catch (InterruptedException except) {
+					//don't do anything?
+				}
+	        	continue; //try again!
 	        }
 	        
 	        //if we've made it this far, verify that the read values are accurate
@@ -243,7 +266,8 @@ class Task implements Runnable {
 	        	
 	        	for (int i = A; i <= Z; i++){
 	        		if (cachedAccounts[i].getRead()){
-	        			cachedAccounts[i].verify(cachedAccounts[i].getInitial());
+	        			//accounts[i].verify(cachedAccounts[i].getInitial());
+						cachedAccounts[i].verify(cachedAccounts[i].getInitial());
 	        		}
 	        	}
 	        } catch (TransactionAbortException exception) {
@@ -287,14 +311,16 @@ public class MultithreadedServer {
         // directly.  
         
         ExecutorService pool = Executors.newCachedThreadPool();
+		int thread = 0;
         while ((line = input.readLine()) != null) {
-        	pool.execute(new Task(accounts,line));
+			thread++;
+        	pool.execute(new Task(accounts,line, thread));
         }
         pool.shutdown();
         
-        //waits for everything to terminate (so the 
+        //waits for everything to terminate (up to 60 seconds
         try {
-        	pool.awaitTermination(120,TimeUnit.SECONDS);
+        	pool.awaitTermination(60,TimeUnit.SECONDS);
         } catch (InterruptedException exception) {
         	System.err.println("Pool failed to terminate in alotted time");
         }
